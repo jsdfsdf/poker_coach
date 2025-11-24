@@ -1,0 +1,8 @@
+# Poker Coach Configuration
+
+# Game settings
+game:
+  small_blind: 1
+  big_blind: 2
+  starting_stack: 50
+  
