@@ -13,10 +13,7 @@ Features:
 """
 
 import streamlit as st
-import httpx
 import yaml
-import json
-from pathlib import Path
 from typing import Optional
 from datetime import datetime
 from engine.game import PokerGame
@@ -86,13 +83,6 @@ def log_hand(hand_dict: dict, coach_note: Optional[str] = None):
         print(f"➡️ Hand logged successfully with ID: {result.inserted_id}")
     except Exception as e:
         print(f"⚠️ Error inserting document: {e}")
-
-    # # Ensure data directory exists
-    # Path("data").mkdir(exist_ok=True)
-
-    # # Append to JSONL file
-    # with open("data/hands.jsonl", "a") as f:
-    #     f.write(json.dumps(log_entry) + "\n")
 
 
 # --- helper to render cards like "9c 8s" -> "9♣ 8♠" ---
