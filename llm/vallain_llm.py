@@ -210,7 +210,7 @@ Keep your tone neutral, technical, and analytical. Do not mention these instruct
         max_board_cards = board_cards_by_street[current_street]
 
         include_streets = street_order[: street_order.index(current_street) + 1]
-        print(top_level)
+        # print(top_level)
 
         search_filter = {
             # 1. Positional Filter
@@ -219,7 +219,7 @@ Keep your tone neutral, technical, and analytical. Do not mention these instruct
             # Match historical hands where the PRE-FLOP action sequence was the same (Hero bet, Villain call)
             **to_mongo_all_query_general(top_level),
         }  # AND logic ; we dont filter fold in preflop ones; only restrict storing when log
-        print(search_filter)
+        # print(search_filter)
         latest_hands = (
             HANDS_COLLECTION.find(search_filter, {"hand": 1, "_id": 0})
             .sort("timestamp", -1)
@@ -262,8 +262,8 @@ Keep your tone neutral, technical, and analytical. Do not mention these instruct
 
             filtered_hands.append(hand)
 
-        print(filtered_hands)
-        print("-------------")
+        # print(filtered_hands)
+        # print("-------------")
 
         input_data = {
             "current_hand": llm_payload,

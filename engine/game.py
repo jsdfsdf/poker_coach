@@ -28,6 +28,9 @@ from llm.coach_llm import LLM_COACH
 from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Any, Optional, Literal
 from openai import OpenAI
+import logging
+
+logger = logging.getLogger(__name__)
 
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -250,6 +253,9 @@ class PokerGame:
 
         legal = self.legal_actions()
         if action not in legal:
+            game_state = to_llm_state(self.state, 1 - self.hero_index)
+            llm_payload = game_state.to_model_payload()
+            logger.warning(f"llm state {llm_payload}")
             raise ValueError(f"Action {action} not legal. Legal actions: {legal}")
 
         # Determine current player
@@ -451,6 +457,7 @@ class PokerGame:
         # resp = get_llm_action(self.client, game_state.to_model_payload(), legal)
         # print(resp)
         action, amt = resp["action"], resp["amount_chips"]
+        logger.warning("villian_llm_action %s", action)
         self.llm_decisions.append(resp["reason"])
         if action in ["check", "fold", "call"]:
             self.apply_action(action)

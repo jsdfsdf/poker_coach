@@ -20,6 +20,13 @@ from engine.game import PokerGame
 from data.db_manager import HANDS_COLLECTION
 from llm.llm_helper import get_top_level_action, filter_dict_keys
 import re
+import logging
+
+logging.basicConfig(
+    level=logging.WARNING,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def load_config():
@@ -448,10 +455,12 @@ def render_action_panel():
                 st.session_state.coach_note = None
                 st.session_state.hand_logged = False
                 st.rerun()
-                
+
         # new chips
         with col3:
-            if st.button("Start New Game", ):
+            if st.button(
+                "Start New Game",
+            ):
                 st.session_state.game = PokerGame()
                 st.session_state.game.new_hand()
                 st.session_state.reveal = False
