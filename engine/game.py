@@ -75,7 +75,7 @@ class PokerGame:
         # Game state
         self.hero_stack = self.starting_stack
         self.villain_stack = self.starting_stack
-        self.hero_index = -1
+        self.hero_index = 0  # start as SB  - 0 BB 1 SB
         self.state = None
         self.hand_history: List[Dict[str, Any]] = []
         self.hand_complete = False
@@ -255,7 +255,7 @@ class PokerGame:
         if action not in legal:
             game_state = to_llm_state(self.state, 1 - self.hero_index)
             llm_payload = game_state.to_model_payload()
-            logger.warning(f"llm state {llm_payload}")
+            # logger.warning(f"llm state {llm_payload}")
             raise ValueError(f"Action {action} not legal. Legal actions: {legal}")
 
         # Determine current player
@@ -457,7 +457,7 @@ class PokerGame:
         # resp = get_llm_action(self.client, game_state.to_model_payload(), legal)
         # print(resp)
         action, amt = resp["action"], resp["amount_chips"]
-        logger.warning("villian_llm_action %s", action)
+        # logger.warning("villian_llm_action %s", action)
         self.llm_decisions.append(resp["reason"])
         if action in ["check", "fold", "call"]:
             self.apply_action(action)

@@ -35,14 +35,18 @@ def load_config():
         return yaml.safe_load(f)
 
 
+def reset_session_state():
+    st.session_state.reveal = False
+    st.session_state.coach_note = None
+    st.session_state.hand_logged = False
+
+
 def init_session_state():
     """Initialize Streamlit session state."""
     if "game" not in st.session_state:
         st.session_state.game = PokerGame()
         st.session_state.game.new_hand()
-        st.session_state.reveal = False
-        st.session_state.coach_note = None
-        st.session_state.hand_logged = False
+        reset_session_state()
 
 
 def get_hand_to_log(game):
@@ -429,8 +433,8 @@ def render_action_panel():
 
         col1, col2, col3 = st.columns(3)
 
+        # Reveal toggle
         with col1:
-            # Reveal toggle
             reveal_on = st.toggle("Reveal Hole Cards", value=st.session_state.reveal)
             if reveal_on != st.session_state.reveal:
                 st.session_state.reveal = reveal_on
@@ -451,9 +455,7 @@ def render_action_panel():
                 ):  # if stacks not enoug hfor big blind
                     st.session_state.game = PokerGame()
                 st.session_state.game.new_hand()
-                st.session_state.reveal = False
-                st.session_state.coach_note = None
-                st.session_state.hand_logged = False
+                reset_session_state()
                 st.rerun()
 
         # new chips
@@ -463,9 +465,7 @@ def render_action_panel():
             ):
                 st.session_state.game = PokerGame()
                 st.session_state.game.new_hand()
-                st.session_state.reveal = False
-                st.session_state.coach_note = None
-                st.session_state.hand_logged = False
+                reset_session_state()
                 st.rerun()
 
         # Get coach note button
@@ -492,72 +492,75 @@ def render_action_panel():
 
     # Check whose turn it is
     current_player = game.get_current_player()
-
+    # Placeholder for the hero controls
+    controls = st.empty()
     if current_player == "villain":
-        st.info("Villain is thinking...")
 
-        # Auto-play villain action
+        st.info("Villain is thinking...")
         game.villian_llm_action()
         # game.villain_action()
         # print("run finish")
         st.rerun()
-        return
+    else:
+        # All hero UI goes *inside* this container
+        with controls.container():
+            # Hero's turn - show action buttons
+            st.write("**Your Turn**")
 
-    # Hero's turn - show action buttons
-    st.write("**Your Turn**")
+            legal = game.legal_actions()
 
-    legal = game.legal_actions()
+            if not legal:
+                st.warning("No legal actions available")
+                return
 
-    if not legal:
-        st.warning("No legal actions available")
-        return
+            # Action buttons
+            col1, col2 = st.columns(2)
 
-    # Action buttons
-    col1, col2 = st.columns(2)
+            with col1:
+                if "fold" in legal:
+                    if st.button("Fold", use_container_width=True):
+                        game.apply_action("fold")
+                        st.rerun()
 
-    with col1:
-        if "fold" in legal:
-            if st.button("Fold", use_container_width=True):
-                game.apply_action("fold")
-                st.rerun()
+                if "check" in legal:
+                    if st.button("Check", use_container_width=True):
+                        game.apply_action("check")
+                        st.rerun()
 
-        if "check" in legal:
-            if st.button("Check", use_container_width=True):
-                game.apply_action("check")
-                st.rerun()
+            with col2:
+                if "call" in legal:
+                    call_amt = (
+                        game.state.checking_or_calling_amount if game.state else 0
+                    )
+                    if st.button(f"Call {call_amt}", use_container_width=True):
+                        game.apply_action("call")
+                        st.rerun()
 
-    with col2:
-        if "call" in legal:
-            call_amt = game.state.checking_or_calling_amount if game.state else 0
-            if st.button(f"Call {call_amt}", use_container_width=True):
-                game.apply_action("call")
-                st.rerun()
+            # Bet/Raise with slider
+            if "bet" in legal or "raise" in legal:
+                st.write("---")
+                action_type = "bet" if "bet" in legal else "raise"
+                min_amt, max_amt = game.get_bet_range()
 
-    # Bet/Raise with slider
-    if "bet" in legal or "raise" in legal:
-        st.write("---")
-        action_type = "bet" if "bet" in legal else "raise"
-        min_amt, max_amt = game.get_bet_range()
+                if min_amt is not None and max_amt is not None and min_amt <= max_amt:
+                    if min_amt < max_amt:
+                        bet_amount = st.slider(
+                            f"{action_type.capitalize()} Amount",
+                            min_value=int(min_amt),
+                            max_value=int(max_amt),
+                            value=int(min_amt),
+                            step=max(1, int((max_amt - min_amt) / 20)),
+                        )
+                    else:
+                        bet_amount = min_amt
 
-        if min_amt is not None and max_amt is not None and min_amt <= max_amt:
-            if min_amt < max_amt:
-                bet_amount = st.slider(
-                    f"{action_type.capitalize()} Amount",
-                    min_value=int(min_amt),
-                    max_value=int(max_amt),
-                    value=int(min_amt),
-                    step=max(1, int((max_amt - min_amt) / 20)),
-                )
-            else:
-                bet_amount = min_amt
-
-            if st.button(
-                f"{action_type.capitalize()} {bet_amount}",
-                type="primary",
-                use_container_width=True,
-            ):
-                game.apply_action(action_type, bet_amount)
-                st.rerun()
+                    if st.button(
+                        f"{action_type.capitalize()} {bet_amount}",
+                        type="primary",
+                        use_container_width=True,
+                    ):
+                        game.apply_action(action_type, bet_amount)
+                        st.rerun()
 
 
 def main():
