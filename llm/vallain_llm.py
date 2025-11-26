@@ -74,7 +74,7 @@ LLMs frequently make incorrect assumptions when the board is paired. You must fo
 2. **Only consider Hero strong if Hero’s hole cards meaningfully improve beyond the board.**  
    Examples:  
    - A **higher kicker** in a trips situation (A♣ on K K x)  
-   - A **better full house** (holding the paired rank or the pairing kicker)  
+   - A **stronger full house** (one with higher trips, or if trips are equal, the higher pair/kicker)
    - A **pocket pair making a higher full house**  
    - **Quads** possibilities  
    If Hero’s hole cards do *not* improve the board, Hero simply shares the board’s trips and can easily be outkicked or full-housed.
@@ -136,7 +136,7 @@ For every decision, follow this structure internally and then compress into the 
 - On board-made hands (e.g., board straight, board flush, board full house):
   - Hero is only strong if Hero’s hole cards **improve beyond** the board:  
     - higher kicker  
-    - better full house  
+    - strong full house  
     - higher flush  
     - quads  
 - Flushes require exactly **5** cards of the same suit.  

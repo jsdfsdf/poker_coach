@@ -21,6 +21,7 @@ from data.db_manager import HANDS_COLLECTION
 from llm.llm_helper import get_top_level_action, filter_dict_keys
 import re
 import logging
+import math
 
 logging.basicConfig(
     level=logging.WARNING,
@@ -546,7 +547,7 @@ def render_action_panel():
                     if min_amt < max_amt:
                         bet_amount = st.slider(
                             f"{action_type.capitalize()} Amount",
-                            min_value=int(min_amt),
+                            min_value=math.ceil(min_amt),
                             max_value=int(max_amt),
                             value=int(min_amt),
                             step=max(1, int((max_amt - min_amt) / 20)),
